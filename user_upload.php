@@ -21,8 +21,6 @@
                 break;
              case 'h':
                 $host = $value;
-                
-
                 break;
             case 'u':
               $user = $value;
@@ -139,7 +137,7 @@
 		//Displaying invalid Emails in the file
 		
 		if($invalid_emails_count===0){
-			echo "No invalid Emails Found";
+			echo "No invalid Emails Found. \n";
 		}
 		else{
 			echo "\n", $invalid_emails_count, " ", "invalid Emails found";
@@ -217,6 +215,11 @@
 	elseif(isset($filename,$user, $password, $host) && !isset($dry_run) && !isset($create_table)){
 
 		insert_data($host, $user, $password, $filename);
+	}
+
+	elseif(isset($create_table) && !isset($user) && !isset($password) && !isset($host)){
+
+		echo "Please specify username, password,and host name to create table. \n";
 	}
 	elseif(isset($help))
 	{
