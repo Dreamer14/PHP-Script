@@ -1,7 +1,7 @@
 <?php
 
 		$short_options = 'u:p:h:';
-        $long_options = array('file:','create_table:','dry_run','help:');
+        $long_options = array('file:','create_table','dry_run','help:');
         $options = getopt($short_options, $long_options);
       
         foreach($options as $option => $value) {
@@ -22,7 +22,7 @@
                 break;
              case 'h':
                 $host = $value;
-                echo $host;
+                
 
                 break;
             case 'u':
@@ -49,11 +49,47 @@
 
 	function show_help(){
 
-		echo "help. \n";
+		echo "help.".PHP_EOL;
 	}
-	function create_table(){
+	function create_table_db($host, $user, $password){
 
-		echo "create table. \n";
+		echo "Opening Database Connection.".PHP_EOL;
+		$connection = mysqli_connect($host, $user, $password) or die(mysqli_connect_error());
+		echo "Database Connection Opened Successfully.".PHP_EOL;
+		//assumption of database name. 
+
+		if(mysqli_query($connection, "create database if not exists `phpscriptdb`;")){
+			echo "Database 'phpscriptdb' Created Successfully \n";
+		}
+		else{
+			echo "Error Creating Database phpscriptdb: " . mysqli_error($connection) . PHP_EOL;
+		}
+
+		$sql_query = "CREATE TABLE `users` (
+		name VARCHAR(30) NOT NULL,
+		surname VARCHAR(30) NOT NULL,
+		email VARCHAR(50) NOT NULL UNIQUE, 
+		INDEX index_email (email)
+		);
+		";
+		mysqli_select_db($connection, "phpscriptdb");	
+
+		if (mysqli_query($connection, "DROP TABLE IF EXISTS `users`")) {
+		echo "Table users exists. Dropping." . PHP_EOL;
+		} else {
+		echo "Error dropping table users: " . mysqli_error($connection) . PHP_EOL;
+		}
+
+		if(mysqli_query($connection, $sql_query)){
+			echo "Table users created successfully.".PHP_EOL;
+		}
+		else{
+			echo "Error creating Table users: " . mysqli_error($connection) . PHP_EOL;
+		}
+
+		
+
+
 	}
 
 	function validate_file_data(){
@@ -71,7 +107,7 @@
 
 	if(isset($create_table,$user, $password, $host) && !isset($dry_run) && !isset($filename)){
 
-		create_table();
+		create_table_db($host, $user, $password);
 	}
 	elseif(isset($dry_run,$filename) && !isset($create_table)&& !isset($user) && !isset($password) && !isset ($host)){
 		validate_file_data();
@@ -80,7 +116,7 @@
 
 		insert_data();
 	}
-	else { /	
+	else { 
 	die ("Unrecognized sequence of options. please use --help for script scenerios. \n");
 }
 
