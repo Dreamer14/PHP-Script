@@ -161,10 +161,43 @@
 	}
 
 
-	function insert_data()
+	function insert_data($host, $user, $password, $filename )
 	{
 
-		echo "Insert data.\n";
+		$validate_data = validate_file_data($filename);
+		
+		if(gettype($validate_data) === "integer")
+		{
+			echo "Invalid emails in the file, Cannot insert data in Database \n";
+		}
+		else
+		{
+			echo "inserting data into database .\n";
+
+			$connection = mysqli_connect($host, $user, $password) or die(mysqli_connect_error());
+			mysqli_select_db($connection, "phpscriptdb");
+			foreach($validate_data as $row)
+			{
+
+				$name = mysqli_real_escape_string($connection, $row[0]);
+				$surname = mysqli_real_escape_string($connection, $row[1]);
+				$email = mysqli_real_escape_string($connection, $row[2]);
+
+				$sql_query = "INSERT INTO `users` (`name`, `surname`, `email`) 
+				VALUES ('$name', '$surname', '$email');
+			";
+
+			if(mysqli_query($connection, $sql_query)){
+			echo "inserted $name, $surname, $email successfully.".PHP_EOL;
+			}
+			else
+			{
+			echo "Error inserting: " . mysqli_error($connection) . PHP_EOL;
+		}
+			}
+
+
+		}
 	}
 
 
@@ -183,7 +216,7 @@
 	}
 	elseif(isset($filename,$user, $password, $host) && !isset($dry_run) && !isset($create_table)){
 
-		insert_data();
+		insert_data($host, $user, $password, $filename);
 	}
 	elseif(isset($help))
 	{
