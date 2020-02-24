@@ -1,6 +1,6 @@
 <?php
 
-		$short_options = 'u:p:h:';
+		$short_options = 'u:p:h:f';
         $long_options = array('file:','create_table','dry_run','help');
         $options = getopt($short_options, $long_options);
       
@@ -28,6 +28,9 @@
             case 'p':
                 $password = $value;
                 break;
+            case 'f':
+                $force = true;
+                break;
              }
              }            
                           
@@ -39,7 +42,8 @@
 	"dry_run: ", isset($dry_run) ? "Yes" : "No", PHP_EOL,
 	"MySQL DB username: ", isset($user) ? $user : "Not specified", PHP_EOL,
 	"MySQL user password: ", isset($password) ? $password : "Not specified", PHP_EOL,
-	"MySQL DB host: ", isset($host) ? $host : "Not specified", PHP_EOL, PHP_EOL;
+	"MySQL DB host: ", isset($host) ? $host : "Not specified", PHP_EOL,
+	"f(force): ", isset($force) ? "Yes" : "No", PHP_EOL;
 
 
 
@@ -49,7 +53,11 @@
 
 		echo "How to use: \n To create table use- 'php user_upload.php -u -p -h --create_table' \n To dry_run use- 'php user_upload.php --file users.csv --dry_run' \n To insert the data into database use- 'php user_upload.php --file users.csv -u -p -h '  ".PHP_EOL;
 	}
-	function create_table_db($host, $user, $password){
+
+	//create table in db
+
+	function create_table_db($host, $user, $password)
+	{
 
 		echo "Opening Database Connection.".PHP_EOL;
 		$connection = mysqli_connect($host, $user, $password) or die(mysqli_connect_error());
@@ -90,8 +98,9 @@
 
 	}
 
-	function validate_file_data($filename){
-
+	function validate_file_data($filename)
+	{
+		$return_data[] = array();
 		$invalid_email[] = array();
 		$invalid_emails_count = 0;
 		$validated_data[] = array();
@@ -123,8 +132,13 @@
 			array_push($invalid_email, $file_row);
 			$invalid_emails_count++;
 		}
-		//adding validated data to an array
-		array_push($validated_data, $file_row);
+		else
+		{
+			//inserting the records only with valid emails
+			array_push($validated_data, $file_row);
+
+		}
+		
 		$iter_count++;
 	}
 
@@ -140,37 +154,37 @@
 			echo "No invalid Emails Found. \n";
 		}
 		else{
-			echo "\n", $invalid_emails_count, " ", "invalid Emails found";
-		foreach($invalid_email as $email){
+			echo "\n", $invalid_emails_count, " ", "Invalid Emails found";
+		foreach($invalid_email as $email)
+		{
 
 			echo implode(",", $email), PHP_EOL;
 		}
 	}
-	//remove first element of array as it contains CSV column names
-	array_shift ($validated_data);
-	//returning corrected array if there are no invalid emails
-	if ($invalid_emails_count === 0)
-	 {
-			return $validated_data;
-	} else 
-	{ // returning number of invalid emails if any.
-		return $invalid_emails_count;
-	}
+
+		array_shift ($validated_data);
+
+	array_push($return_data, $validated_data);
+	array_push($return_data, $invalid_emails_count);
+	
+	return $return_data;
 	}
 
 
 	function insert_data($host, $user, $password, $filename )
 	{
-
-		$validate_data = validate_file_data($filename);
 		
-		if(gettype($validate_data) === "integer")
+		$data = validate_file_data($filename);
+		$validate_data = $data[1];
+		$invalid_email_count = $data[2];
+
+		if($invalid_email_count > 0)
 		{
-			echo "Invalid emails in the file, Cannot insert data in Database \n";
+			echo "Invalid emails in the file, Cannot insert data in Database \n If you want to insert the data without the invalid records, Run the same script with -f flag \n";
 		}
 		else
 		{
-			echo "inserting data into database .\n";
+			echo "Inserting data into database .\n";
 
 			$connection = mysqli_connect($host, $user, $password) or die(mysqli_connect_error());
 			mysqli_select_db($connection, "phpscriptdb");
@@ -198,6 +212,42 @@
 		}
 	}
 
+	function insert_data_force($host, $user, $password, $filename, $force )
+	{
+			
+			$data = validate_file_data($filename);
+			$validate_data = $data[1];
+			echo "Inserting data into database .\n";
+
+			$connection = mysqli_connect($host, $user, $password) or die(mysqli_connect_error());
+			mysqli_select_db($connection, "phpscriptdb");
+			foreach($validate_data as $row)
+			{
+
+				$name = mysqli_real_escape_string($connection, $row[0]);
+				$surname = mysqli_real_escape_string($connection, $row[1]);
+				$email = mysqli_real_escape_string($connection, $row[2]);
+
+				$sql_query = "INSERT INTO `users` (`name`, `surname`, `email`) 
+				VALUES ('$name', '$surname', '$email');
+			";
+
+			if(mysqli_query($connection, $sql_query)){
+			echo "inserted $name, $surname, $email successfully.".PHP_EOL;
+			}
+			else
+			{
+			echo "Error inserting: " . mysqli_error($connection) . PHP_EOL;
+		}
+			}
+
+
+		}
+	
+
+
+	
+
 
 
 		
@@ -212,12 +262,19 @@
 	{
 		validate_file_data($filename);
 	}
-	elseif(isset($filename,$user, $password, $host) && !isset($dry_run) && !isset($create_table)){
-
+	elseif(isset($filename,$user, $password, $host) && !isset($dry_run) && !isset($create_table)  && !isset($force))
+	{
+		
 		insert_data($host, $user, $password, $filename);
 	}
 
-	elseif(isset($create_table) && !isset($user) && !isset($password) && !isset($host)){
+	elseif(isset($filename,$user, $password, $host, $force) && !isset($dry_run) && !isset($create_table))
+	{
+		insert_data_force($host, $user, $password, $filename, $force);
+	}
+
+	elseif(isset($create_table) && !isset($user) && !isset($password) && !isset($host))
+	{
 
 		echo "Please specify username, password,and host name to create table. \n";
 	}
@@ -226,9 +283,11 @@
 
 		show_help();
 	}
+	
+
 	else 
 	{ 
 	die ("Unrecognized sequence of options. please use --help for script scenerios. \n");
-}
+	}
 
 ?>
