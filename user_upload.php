@@ -97,6 +97,7 @@
 
 
 	}
+		//Validating the records for invalid emails and other requirements. 
 
 	function validate_file_data($filename)
 	{
