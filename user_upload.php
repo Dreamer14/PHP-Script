@@ -43,7 +43,7 @@
 	"MySQL DB username: ", isset($user) ? $user : "Not specified", PHP_EOL,
 	"MySQL user password: ", isset($password) ? $password : "Not specified", PHP_EOL,
 	"MySQL DB host: ", isset($host) ? $host : "Not specified", PHP_EOL,
-	"f(force): ", isset($force) ? "Yes" : "No", PHP_EOL;
+	"f(force): ", isset($force) ? "Yes" : "No", PHP_EOL, PHP_EOL;
 
 
 
@@ -51,7 +51,7 @@
 
 	function show_help(){
 
-		echo "How to use: \n To create table use- 'php user_upload.php -u -p -h --create_table' \n To dry_run use- 'php user_upload.php --file users.csv --dry_run' \n To insert the data into database use- 'php user_upload.php --file users.csv -u -p -h '  ".PHP_EOL;
+		echo "How to use: \n To create table use- 'php user_upload.php  --create_table -u <MySQL-User Name > -p <MySQL Passowrd> -h <MySQL Host> ' \n To dry_run use - 'php user_upload.php --file users.csv --dry_run' \n To insert the data into database use- 'php user_upload.php --file users.csv -u -p -h ' \n This Script will only insert the data into database if there are not any invalid emails. \n If you want to insert the data into database if there are invalid email (This will only insert the correct records), Run the script- hp user_upload.php  --create_table -u <MySQL-User Name > -p <MySQL Passowrd> -h <MySQL Host> -f \n For help use --help \n ";
 	}
 
 	//create table in db
@@ -154,7 +154,7 @@
 			echo "No invalid Emails Found. \n";
 		}
 		else{
-			echo "\n", $invalid_emails_count, " ", "Invalid Emails found";
+			echo "\n", $invalid_emails_count, " ", "Records found with invalid Email. \n";
 		foreach($invalid_email as $email)
 		{
 
@@ -180,11 +180,11 @@
 
 		if($invalid_email_count > 0)
 		{
-			echo "Invalid emails in the file, Cannot insert data in Database \n If you want to insert the data without the invalid records, Run the same script with -f flag \n";
+			echo " \n Invalid emails found in the file, Cannot insert data into Database. \n If you want to insert the data in Database without the invalid records, Run the same script with -f option. \n";
 		}
 		else
 		{
-			echo "Inserting data into database .\n";
+			echo "\n Inserting data into database .\n";
 
 			$connection = mysqli_connect($host, $user, $password) or die(mysqli_connect_error());
 			mysqli_select_db($connection, "phpscriptdb");
