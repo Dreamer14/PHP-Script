@@ -51,7 +51,7 @@
 
 	function show_help(){
 
-		echo "How to use: \n To create table use- 'php user_upload.php  --create_table -u <MySQL-User Name > -p <MySQL Passowrd> -h <MySQL Host> ' \n To dry_run use - 'php user_upload.php --file users.csv --dry_run' \n To insert the data into database use- 'php user_upload.php --file users.csv -u -p -h ' \n This Script will only insert the data into database if there are not any invalid emails. \n If you want to insert the data into database if there are invalid email (This will only insert the correct records), Run the script- hp user_upload.php  --create_table -u <MySQL-User Name > -p <MySQL Passowrd> -h <MySQL Host> -f \n For help use --help \n ";
+		echo "How to use: \n To create table use- 'php user_upload.php  --create_table -u <MySQL-User Name > -p <MySQL Passowrd> -h <MySQL Host> ' \n To dry_run use - 'php user_upload.php --file users.csv --dry_run' \n To insert the data into database use- 'php user_upload.php --file users.csv -u -p -h ' \n This Script will only insert the data into database if there are not any invalid emails. \n If you want to insert the data into database if there are invalid email (This will only insert the correct records), Run the script- php user_upload.php  --create_table -u <MySQL-User Name > -p <MySQL Passowrd> -h <MySQL Host> -f \n For help use --help \n ";
 	}
 
 	//create table in db
