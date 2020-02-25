@@ -38,3 +38,13 @@ database won't be altered
 • -p – MySQL password
 • -h – MySQL host
 • --help – which will output the above list of directives with details.
+
+
+HOW TO USE:
+
+How to use: \n To create table use- 'php user_upload.php  --create_table -u <MySQL-User Name > -p <MySQL Passowrd> -h <MySQL Host> '
+To dry_run use - 'php user_upload.php --file users.csv --dry_run'
+To insert the data into database use- 'php user_upload.php --file users.csv -u -p -h '
+This Script will only insert the data into database if there are not any invalid emails.
+If you want to insert the data into database if there are invalid email (This will only insert the correct records), Run the script- php user_upload.php  --create_table -u <MySQL-User Name > -p <MySQL Passowrd> -h <MySQL Host> -f
+For help use --help 
